@@ -1,0 +1,67 @@
+---
+title: "Контрольная работа 4"
+author: "Машенька"
+date: "01 06 2018"
+output:
+  html_document:
+    df_print: paged
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(tidyverse)
+library(maxLik)
+n_sim <- 10^4
+set.seed(68)
+all <- tibble(x = rexp(n_sim, rate = 3), 
+              y = rnorm(n_sim, mean = 7, sd = 5), 
+              z = rbinom(n_sim, size = 5, prob = 1/3))
+```
+
+оцениваем нужные величины
+```{r}
+all2 <- mutate(all, d = (x + y)/(y + z),
+               w = x*y, 
+               event = x*y > z + y)
+```
+```{r}
+mean(all2$event)
+```
+```{r}
+mean(all2$d)
+```
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+var(all2$w)
+```
+Упражнение 2. Оценка методом правдоподобия
+Величины $x_i$ нормальны $N(\mu, \sigma^2$
+Оцените оба параметра по выборке
+В качестве $x_i$ логарифм цены из diamonds
+```{r}
+qplot(data = diamonds, x = log(price))
+x <- log(diamonds$price)
+```
+
+Определим лог-функцию правдоподобия 
+```{r}
+logl <- function(theta, x){
+  mu <- theta[1]
+  sigma2 <- theta[2]
+  n <- length(x)
+  res <- -n / 2 * log(sigma2) - 1/2/sigma2 * sum((x - mu)^2)
+  return(res)
+}
+```
+Максимизируем правдоподобие
+```{r}
+theta_0 <- c(8, 1)
+model <- maxLik(logl, start = theta_0, x = x)
+summary(model)
+```
+
+
+
+
+
+
+
